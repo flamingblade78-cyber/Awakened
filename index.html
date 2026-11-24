@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090e18">
+<meta name="description" content="A real-life RPG progression tracker inspired by Solo Leveling.">
+<link rel="manifest" href="manifest.webmanifest">
+<title>AWAKENED — System</title>
+<style>
+:root{color-scheme:dark;--bg:#080d16;--panel:#101a29;--panel2:#142237;--line:#253954;--blue:#69baff;--cyan:#65e3e0;--muted:#91a5bd;--white:#edf5ff;--green:#63dfad;--gold:#e7bd69;--red:#f07885}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#193353 0,#080d16 55%);color:var(--white);font:15px system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh;padding-bottom:86px}
+header{position:sticky;top:0;z-index:5;background:#090f1beF;border-bottom:1px solid var(--line);backdrop-filter:blur(12px);padding:13px 17px;display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:900;letter-spacing:.18em;color:var(--blue);font-size:13px}.sub{font-size:10px;color:var(--muted);letter-spacing:.15em}
+main{max-width:760px;margin:auto;padding:16px}.screen{display:none}.screen.active{display:block}
+h1{font-size:28px;margin:3px 0 4px;letter-spacing:.04em}h2{font-size:18px;margin:0 0 12px}h3{font-size:14px;margin:0 0 8px;color:#cfe5ff}
+p{line-height:1.45;color:var(--muted)}.muted{color:var(--muted)}.small{font-size:12px}.eyebrow{font-size:10px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.card{background:linear-gradient(145deg,#132239,#0e1725);border:1px solid var(--line);border-radius:17px;padding:15px;margin:12px 0;box-shadow:0 8px 25px #0003}
+.hero{padding:19px;background:linear-gradient(135deg,#142c48,#101a2b 65%,#172039);border-color:#345778}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.row.wrap{flex-wrap:wrap}.level{font-size:46px;font-weight:900;line-height:1.1;color:var(--blue)}.rank{display:inline-block;border:1px solid #4c779e;color:#b7dcff;border-radius:6px;padding:4px 8px;font-size:11px;letter-spacing:.12em}
+.bar{height:9px;background:#25354b;border-radius:99px;overflow:hidden;margin:10px 0 5px}.fill{height:100%;background:linear-gradient(90deg,#398be0,#68e0df);border-radius:99px;width:0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.stat{background:#0b1421;border:1px solid #263a54;border-radius:12px;padding:11px}.stat b{font-size:22px;color:#c7e4ff}.stat span{display:block;color:var(--muted);font-size:11px}
+button,.btn{border:1px solid #365879;background:#173250;color:#eaf5ff;border-radius:10px;padding:10px 13px;font-weight:650;font-size:13px;cursor:pointer}button.primary{background:linear-gradient(110deg,#246cb3,#227f93);border-color:#529ac4}button.ghost{background:#111d2c}button.danger{border-color:#743c4a;background:#321b27;color:#ffc3cb}button:disabled{opacity:.45}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:8;display:grid;grid-template-columns:repeat(5,1fr);background:#0a111df5;border-top:1px solid var(--line);padding:7px 5px calc(7px + env(safe-area-inset-bottom));backdrop-filter:blur(12px)}
+nav button{border:0;background:transparent;color:#8fa5bf;padding:7px 2px;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px}nav button.active{color:var(--blue);background:#14253a;border-radius:10px}nav .ico{font-size:18px}
+.quest{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid #26364a}.quest:last-child{border:0}.quest input{accent-color:#60c7d8;width:19px;height:19px;margin-top:2px}.quest .qbody{flex:1}.xp{color:var(--green);font-size:12px;white-space:nowrap}
+input,select,textarea{width:100%;background:#091321;border:1px solid #30455f;color:var(--white);border-radius:9px;padding:11px;font:inherit;margin:5px 0 10px}label{font-size:12px;color:#b4c6da}textarea{min-height:75px}
+.listitem{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #26364a}.listitem:last-child{border:0}
+.pill{font-size:10px;padding:4px 7px;border-radius:6px;background:#1a314b;color:#b8dcff;border:1px solid #365879}.pill.green{color:#a5f4d2;border-color:#28634f;background:#102c26}.pill.gold{color:#ffe1a0;border-color:#705b35;background:#2a2418}
+.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}
+.skill{border:1px solid #344d6a;border-radius:12px;padding:12px;background:#0b1625;margin:8px 0}.skill.unlocked{border-color:#3a947a}.skill.locked{opacity:.68}
+.empty{text-align:center;padding:22px;color:var(--muted)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:88px;background:#193b4c;border:1px solid #4c9bb0;padding:11px 16px;border-radius:10px;z-index:20;display:none;max-width:90%;box-shadow:0 8px 30px #0008}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+@media(min-width:650px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}main{padding:24px}.card{padding:18px}}
+</style>
+</head>
+<body>
+<header><div><div class="brand">AWAKENED</div><div class="sub">REAL-LIFE SYSTEM · STANDARD MODE</div></div><div class="pill green" id="online">● LOCAL SAVE</div></header>
+<main>
+<section class="screen active" id="home">
+ <div class="card hero">
+  <div class="row"><span class="eyebrow">PLAYER STATUS</span><span class="rank" id="rank">E-RANK</span></div>
+  <h1 id="playerName">THE AWAKENED</h1><div class="level">LV. <span id="level">1</span></div>
+  <div class="row small"><span id="xpLabel">0 / 100 XP</span><span id="xpPercent">0%</span></div><div class="bar"><div class="fill" id="xpFill"></div></div>
+  <div class="row small muted"><span id="freePoints">2 attribute points available</span><span id="skillPoints">0 skill points</span></div>
+ </div>
+ <div class="row"><h2>Daily Quest Log</h2><span class="pill" id="dailyDate"></span></div>
+ <div class="card" id="dailyList"></div>
+ <div class="row"><h2>Quick Actions</h2></div>
+ <div class="actions"><button class="primary" onclick="showScreen('quests')">＋ Add Quest</button><button onclick="showScreen('status')">Allocate Stats</button></div>
+ <div class="card"><div class="row"><h3>System Notice</h3><span class="pill green">ACTIVE</span></div><p class="small">Progress is earned through real effort. Rest is part of the system. No missed quest removes your XP or levels.</p></div>
+</section>
+<section class="screen" id="status">
+ <div class="eyebrow">PLAYER PROFILE</div><h1>STATUS</h1><p>Allocate earned attribute points. Starting attributes are illustrative game values, not assessments of your real abilities.</p>
+ <div class="card"><div class="row"><h2>Attributes</h2><span class="pill gold" id="pointsBadge">2 POINTS</span></div><div id="statsList"></div></div>
+ <div class="card"><h2>Class & Rank</h2><div class="row"><span id="className">Unawakened</span><span class="rank" id="classRank">LEVEL 1</span></div><p class="small">At level 10, choose a class. You can develop every attribute regardless of class.</p><div id="classChoices" class="actions"></div></div>
+ <div class="card"><h2>Player Details</h2><label>Display name</label><input id="nameInput" maxlength="24" placeholder="The Awakened"><button class="primary" onclick="saveName()">Save name</button></div>
+</section>
+<section class="screen" id="quests">
+ <div class="eyebrow">MISSIONS & OBJECTIVES</div><h1>QUEST BOARD</h1><p>Adaptive suggestions are generated from your chosen focus areas. Edit or add quests whenever needed.</p>
+ <div class="card"><h2>Create a quest</h2><label>Quest name</label><input id="qName" maxlength="70" placeholder="e.g. Revise biology notes"><div class="grid"><div><label>Category</label><select id="qCategory"><option>Study</option><option>Training</option><option>Reading</option><option>Skill</option><option>Life</option><option>Recovery</option><option>Custom</option></select></div><div><label>Difficulty</label><select id="qDifficulty"><option value="E">E · Routine</option><option value="D">D · Easy</option><option value="C" selected>C · Intermediate</option><option value="B">B · Challenging</option><option value="A">A · Difficult</option><option value="S">S · Exceptional</option></select></div></div><label>Repeat</label><select id="qRepeat"><option value="once">One-time</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select><button class="primary" onclick="addQuest()">＋ Create quest</button></div>
+ <div class="card"><div class="row"><h2>Active quests</h2><span class="pill" id="activeCount"></span></div><div id="questList"></div></div>
+ <div class="card"><h2>Adaptive quest preferences</h2><p class="small">Choose focus areas. The system uses these to suggest a balanced daily set.</p><div id="focusOptions" class="grid"></div><button class="primary" onclick="saveFocus()">Save focus areas</button><button class="ghost" onclick="generateAdaptive()">Generate today's quests</button></div>
+</section>
+<section class="screen" id="skills">
+ <div class="eyebrow">ABILITIES & DEVELOPMENT</div><h1>SKILL TREE</h1><p>Spend Skill Points to unlock a skill. Rank mastery by demonstrated practice, not just points.</p>
+ <div class="card"><div class="row"><h2>Available Skill Points</h2><span class="pill gold" id="spCount">0</span></div><div id="skillList"></div></div>
+ <div class="card"><h2>Mastery ranks</h2><p class="small">Beginner → Apprentice → Adept → Expert → Master. Record evidence of practice in your skill notes.</p></div>
+</section>
+<section class="screen" id="records">
+ <div class="eyebrow">HISTORY & COLLECTION</div><h1>RECORDS</h1>
+ <div class="grid" id="recordStats"></div>
+ <div class="card"><h2>Achievements & Titles</h2><div id="achievements"></div></div>
+ <div class="card"><h2>Quest history</h2><div id="history"></div></div>
+ <div class="card"><h2>Inventory</h2><p class="small">Cosmetic rewards and earned relics. No equipment grants real-world abilities.</p><div id="inventory"></div></div>
+ <div class="card"><h2>Backup & Data</h2><p class="small">Your save is stored on this device in this browser. Export a backup regularly, especially before clearing browser data.</p><div class="actions"><button class="primary" onclick="exportSave()">Export backup</button><button onclick="document.getElementById('importFile').click()">Import backup</button><button class="danger" onclick="resetSave()">Reset all data</button></div><input id="importFile" type="file" accept="application/json" hidden onchange="importSave(event)"></div>
+</section>
+</main>
+<nav>
+ <button class="active" data-screen="home" onclick="showScreen('home')"><span class="ico">⌂</span>Home</button>
+ <button data-screen="status" onclick="showScreen('status')"><span class="ico">◈</span>Status</button>
+ <button data-screen="quests" onclick="showScreen('quests')"><span class="ico">▤</span>Quests</button>
+ <button data-screen="skills" onclick="showScreen('skills')"><span class="ico">✧</span>Skills</button>
+ <button data-screen="records" onclick="showScreen('records')"><span class="ico">♜</span>Records</button>
+</nav>
+<div class="toast" id="toast"></div>
+<script>
+const KEY='awakened_system_save_v1';
+const ATTRS=[['STR','Strength','Training and physical skills'],['INT','Intelligence','Learning and problem solving'],['END','Endurance','Sports and stamina'],['DIS','Discipline','Consistency and commitments'],['WIS','Wisdom','Reflection and judgement'],['CHA','Charisma','Communication and teamwork']];
+const XP={E:8,D:15,C:28,B:42,A:62,S:100};
+const SKILLS=[
+ ['Rapid Learning','INT','Organise and retain information effectively.'],
+ ['Problem Solver','INT','Practise breaking complex problems into steps.'],
+ ['Iron Routine','DIS','Build consistency with sustainable routines.'],
+ ['Focus Mode','DIS','Practise distraction-managed work sessions.'],
+ ['Physical Mastery','STR','Track safe, coached physical skill development.'],
+ ['Endurance Craft','END','Build stamina gradually with appropriate recovery.'],
+ ['Silver Tongue','CHA','Develop presentation and conversation skills.'],
+ ['Team Player','CHA','Practise collaboration and listening.'],
+ ['Clear Judgement','WIS','Reflect on decisions and learn from outcomes.'],
+ ['Recovery Insight','WIS','Recognise when rest and adjustment are needed.']
+];
+const CLASSES={ 'Shadow Monarch':'Balanced progression, adaptability and consistency.','Archmage':'Learning, reasoning and knowledge.','Knight':'Physical skill, strength and endurance.','Bard':'Communication, creativity and collaboration.'};
+function today(){return new Date().toISOString().slice(0,10)}
+function defaultSave(){return {version:1,name:'THE AWAKENED',level:1,xp:0,totalXP:0,stats:{STR:10,INT:10,END:10,DIS:10,WIS:10,CHA:10},attributePoints:2,skillPoints:0,class:null,skills:[],skillRanks:{},quests:[],history:[],achievements:[],coins:0,focus:['Study','Training','Reading','Life'],dailyDate:today(),lastWeekly:null,created:today()}}
+let data=load();
+function load(){try{let x=JSON.parse(localStorage.getItem(KEY));return x&&x.version===1?x:defaultSave()}catch(e){return defaultSave()}}
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function toast(s){let el=document.getElementById('toast');el.textContent=s;el.style.display='block';setTimeout(()=>el.style.display='none',2400)}
+function xpNeeded(l){if(l<=5)return 100;if(l<=10)return 200;return 300+Math.floor((l-11)/10)*100}
+function rankFor(l){if(l>=100)return 'SHADOW MONARCH';if(l>=80)return 'MONARCH';if(l>=60)return 'NATIONAL';if(l>=50)return 'S-RANK';if(l>=40)return 'A-RANK';if(l>=30)return 'B-RANK';if(l>=20)return 'C-RANK';if(l>=10)return 'D-RANK';return 'E-RANK'}
+function levelUp(){while(data.xp>=xpNeeded(data.level)){data.xp-=xpNeeded(data.level);data.level++;data.attributePoints+=2;if(data.level%3===0)data.skillPoints++;toast('LEVEL UP! You reached level '+data.level);if(data.level===10)toast('AWAKENING AVAILABLE: choose your class in Status.');}}
+function awardXP(amount,source){data.xp+=amount;data.totalXP+=amount;levelUp();data.history.unshift({date:today(),name:source,xp:amount});data.history=data.history.slice(0,100);checkAchievements();save()}
+function checkAchievements(){
+ const tests=[['First Awakening',()=>data.level>=2],['Scholar',()=>data.history.filter(x=>x.name.includes('[Study]')).length>=30],['Iron Will',()=>streakDays()>=30],['Athlete',()=>data.history.filter(x=>x.name.includes('[Training]')).length>=50],['Polymath',()=>Object.values(data.stats).filter(x=>x>=15).length>=3],['Unstoppable',()=>data.level>=50]];
+ tests.forEach(([n,f])=>{if(f()&&!data.achievements.includes(n)){data.achievements.push(n);data.coins+=10}});
+}
+function streakDays(){let dates=[...new Set(data.history.map(x=>x.date))].sort().reverse(),n=0,d=new Date();for(let i=0;i<dates.length;i++){let s=new Date(d);s.setDate(d.getDate()-i);if(dates.includes(s.toISOString().slice(0,10)))n++;else break}return n}
+function seedDaily(){if(data.dailyDate!==today()){data.dailyDate=today();data.quests.filter(q=>q.repeat==='daily').forEach(q=>q.done=false);data.quests.filter(q=>q.repeat==='weekly'&&q.lastDone!==weekKey()).forEach(q=>q.done=false);if(!data.quests.some(q=>q.repeat==='daily'))generateAdaptive(false);save()}}
+function weekKey(){let d=new Date();let one=new Date(d.getFullYear(),0,1);return d.getFullYear()+'-W'+Math.ceil((((d-one)/86400000)+one.getDay()+1)/7)}
+function addQuest(){let name=document.getElementById('qName').value.trim();if(!name){toast('Enter a quest name first.');return}let diff=document.getElementById('qDifficulty').value;data.quests.unshift({id:crypto.randomUUID(),name,category:document.getElementById('qCategory').value,diff,xp:XP[diff],repeat:document.getElementById('qRepeat').value,done:false,created:today()});document.getElementById('qName').value='';save();toast('Quest added to your log.')}
+function completeQuest(id){let q=data.quests.find(x=>x.id===id);if(!q||q.done)return;q.done=true;q.lastDone=q.repeat==='weekly'?weekKey():today();awardXP(q.xp,'['+q.category+'] '+q.name);if(q.repeat==='once')data.quests=data.quests.filter(x=>x.id!==id);else save();toast('Quest completed: +'+q.xp+' XP')}
+function deleteQuest(id){data.quests=data.quests.filter(q=>q.id!==id);save()}
+function generateAdaptive(show=true){let templates={'Study':['Review one topic for 25 minutes','Complete a focused homework task'],'Training':['Complete planned training or a sport session','Practise a sport skill safely'],'Reading':['Read for 20 minutes','Summarise something you learned'],'Life':['Prepare your school bag or workspace','Complete one useful responsibility'],'Skill':['Practise a chosen skill for 20 minutes'],'Recovery':['Take a proper rest break and prepare for sleep']};let added=0;data.focus.forEach(cat=>{if(data.quests.some(q=>q.repeat==='daily'&&q.category===cat&&!q.done))return;let arr=templates[cat]||[];if(arr.length){let name=arr[(new Date().getDate()+cat.length)%arr.length];data.quests.push({id:crypto.randomUUID(),name,category:cat,diff:'D',xp:XP.D,repeat:'daily',done:false,created:today(),adaptive:true});added++}});save();if(show)toast(added?'Generated '+added+' adaptive quests.':'Your daily quests are already set.')}
+function saveFocus(){data.focus=[...document.querySelectorAll('[data-focus]:checked')].map(x=>x.value);save();toast('Focus areas saved.')}
+function allocate(key){if(data.attributePoints<1)return;data.stats[key]++;data.attributePoints--;save();toast(key+' increased.')}
+function unlockSkill(name){if(data.skillPoints<1||data.skills.includes(name))return;data.skillPoints--;data.skills.push(name);data.skillRanks[name]='Beginner';save();toast(name+' unlocked.')}
+function chooseClass(name){if(data.level<10){toast('Class awakening unlocks at level 10.');return}if(data.class){toast('Your class has already been chosen.');return}data.class=name;save();toast('Awakening complete: '+name)}
+function saveName(){let n=document.getElementById('nameInput').value.trim();if(n){data.name=n.slice(0,24);save();toast('Player name updated.')}}
+function showScreen(id){document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.screen===id));render();window.scrollTo(0,0)}
+function render(){
+ let need=xpNeeded(data.level),pct=Math.floor(data.xp/need*100);
+ document.getElementById('playerName').textContent=data.name;document.getElementById('level').textContent=data.level;document.getElementById('rank').textContent=rankFor(data.level);document.getElementById('xpLabel').textContent=data.xp+' / '+need+' XP';document.getElementById('xpPercent').textContent=pct+'%';document.getElementById('xpFill').style.width=pct+'%';document.getElementById('freePoints').textContent=data.attributePoints+' attribute points available';document.getElementById('skillPoints').textContent=data.skillPoints+' skill points';document.getElementById('dailyDate').textContent=today();
+ let daily=data.quests.filter(q=>q.repeat==='daily');document.getElementById('dailyList').innerHTML=daily.length?daily.map(q=>questHTML(q,true)).join(''):'<div class="empty">No daily quests. Generate adaptive quests from the Quest Board.</div>';
+ document.getElementById('statsList').innerHTML=ATTRS.map(([k,n,d])=>`<div class="listitem"><div><b>${k} · ${n}</b><div class="small muted">${d}</div></div><div class="row"><b>${data.stats[k]}</b><button ${data.attributePoints<1?'disabled':''} onclick="allocate('${k}')">＋</button></div></div>`).join('');
+ document.getElementById('pointsBadge').textContent=data.attributePoints+' POINTS';document.getElementById('className').textContent=data.class||'Unawakened';document.getElementById('classRank').textContent='LEVEL '+data.level;document.getElementById('nameInput').value=data.name;
+ document.getElementById('classChoices').innerHTML=Object.keys(CLASSES).map(n=>`<button ${data.level<10||data.class?'disabled':''} onclick="chooseClass('${n}')">${n}</button>`).join('');
+ document.getElementById('questList').innerHTML=data.quests.length?data.quests.map(q=>questHTML(q,false)).join(''):'<div class="empty">No active quests.</div>';document.getElementById('activeCount').textContent=data.quests.length+' ACTIVE';
+ document.getElementById('focusOptions').innerHTML=['Study','Training','Reading','Life','Skill','Recovery'].map(x=>`<label class="stat"><input data-focus type="checkbox" value="${x}" ${data.focus.includes(x)?'checked':''} style="width:auto;margin:0 5px 0 0">${x}</label>`).join('');
+ document.getElementById('spCount').textContent=data.skillPoints;document.getElementById('skillList').innerHTML=SKILLS.map(([n,a,d])=>{let unlocked=data.skills.includes(n);return `<div class="skill ${unlocked?'unlocked':'locked'}"><div class="row"><b>${n}</b><span class="pill">${a}</span></div><p class="small">${d}</p><div class="row"><span class="small">${unlocked?'Unlocked · '+data.skillRanks[n]:'Cost: 1 Skill Point'}</span><button ${unlocked||data.skillPoints<1?'disabled':''} onclick="unlockSkill('${n}')">${unlocked?'Unlocked':'Unlock'}</button></div></div>`}).join('');
+ document.getElementById('recordStats').innerHTML=[['Total XP',data.totalXP],['Quests completed',data.history.length],['Achievements',data.achievements.length],['Coins',data.coins],['Current streak',streakDays()+' days'],['Level',data.level]].map(x=>`<div class="stat"><b>${x[1]}</b><span>${x[0]}</span></div>`).join('');
+ document.getElementById('achievements').innerHTML=data.achievements.length?data.achievements.map(x=>`<div class="listitem"><b>🏅 ${x}</b><span class="pill gold">TITLE</span></div>`).join(''):'<div class="empty">Achievements will appear here as you earn them.</div>';
+ document.getElementById('history').innerHTML=data.history.length?data.history.slice(0,20).map(x=>`<div class="listitem"><div><b>${esc(x.name)}</b><div class="small muted">${x.date}</div></div><span class="xp">+${x.xp} XP</span></div>`).join(''):'<div class="empty">No completed quests yet.</div>';
+ document.getElementById('inventory').innerHTML=`<div class="listitem"><b>Awakening Emblem</b><span class="pill">Starting item</span></div><div class="listitem"><b>System Coins</b><span class="pill gold">${data.coins}</span></div>`;
+}
+function questHTML(q,compact){return `<div class="quest"><input type="checkbox" ${q.done?'checked':''} onchange="completeQuest('${q.id}')" ${q.done?'disabled':''}><div class="qbody"><b>${esc(q.name)}</b><div class="small muted">${q.category} · ${q.diff}-Rank · ${q.repeat==='once'?'One-time':q.repeat}</div></div><span class="xp">+${q.xp} XP</span>${compact?'':`<button class="ghost" aria-label="Delete quest" onclick="deleteQuest('${q.id}')">×</button>`}</div>`}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function exportSave(){let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='awakened-system-backup-'+today()+'.json';a.click();URL.revokeObjectURL(a.href);toast('Backup exported.')}
+function importSave(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(x.version!==1||!x.stats||!Array.isArray(x.quests))throw Error();data=x;save();toast('Backup restored.')}catch(err){toast('Invalid backup file.')}};r.readAsText(f);e.target.value=''}
+function resetSave(){if(confirm('Permanently erase this device save? Export a backup first if you may want it later.')){data=defaultSave();save();toast('System data reset.')}}
+seedDaily();if(!data.quests.length)generateAdaptive(false);render();
+if('serviceWorker' in navigator && location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
