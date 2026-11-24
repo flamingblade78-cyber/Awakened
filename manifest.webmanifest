@@ -1,0 +1,11 @@
+{
+  "name": "AWAKENED \u2014 Real-Life System",
+  "short_name": "AWAKENED",
+  "description": "A dark Solo Leveling-inspired real-life RPG tracker.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#080d16",
+  "theme_color": "#090e18",
+  "orientation": "portrait"
+}
